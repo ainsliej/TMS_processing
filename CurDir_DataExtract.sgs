@@ -1,0 +1,127 @@
+Var data%;                          ' View handle for our data file
+var XCol%:=1;                       ' Select X (time) columns - set to one for times or zero for no times
+Var start:=1.255;                  ' This is the start time within each frame
+Var endpos:=1.4;                  ' This is the end time within each frame
+             
+
+var state%;
+var file%;
+var fPath$;
+var fName$;
+var name$;
+var subj%;
+var timept%;
+var session%;
+var filenm$;
+var newfilenm$;
+var pathnm$;
+var filenew$;
+var chan%;
+var chanNm$;
+            
+ var v11% := ViewFind("LogText");           
+FrontView(v11%);
+EditSelectAll();
+EditClear(); 
+
+for chan%:= 1 to 2 do
+    
+            if chan%=1 then chanNm$:="FDI"; else chanNm$:="APB";endif
+            filenm$:= Print$("APBvib_will.cfs");
+            newfilenm$:= Print$("APBvib_will_%s", chanNm$);
+            'filenew$:= Print$("ptp0%d_session%d_T%d.cfs", subj%, session%, timept%);
+            pathnm$:= Print$("I:\\");
+            'message(filenm$);
+            'message(pathnm$);
+            FilePathSet(pathnm$,0); 
+            fPath$:=FilePath$();
+           ' message(fPath$);
+            data%:=FileOpen(filenm$,0,3);
+            name$:=FileName$(3);
+            fName$:= Print$("%s%s.txt",fPath$,newfilenm$);
+          '  message(pathnm$);
+           ' message(filenm$);
+            if data%<0 then Message("Unable to open new data file"); endif;
+
+            
+        'FilePathSet("D:\\P01S01\\");
+        'fPath$:=FilePath$(); 
+        'data%:=FileOpen("PTP01_Session1_T1.cfs",0,3);
+        'name$:=FileName$(3);
+'Window(0,0,100,100);
+FrontView(data%);			'Bring the data view to the front
+
+'if ViewKind() = 0 then              'Check we have a data file open
+'data%:= View();                      'If so, use it
+'FrontView(data%);
+'else
+'data%:= FileOpen("",0);        'If not prompt user to select one
+'WindowVisible(1);
+'endif;
+            
+
+'Window(0,0,100,100);			'Make data window in top bit of screen
+
+
+Data% := Frontview();
+'DoExport();
+
+'proc DoExport();
+var fp%;                            ' Index for first point wanted
+Var x%;                             ' Count of points per frame - sets number of rows
+Var y%;                             ' Count of colums to generate
+
+Frame(1);
+x% := Chanrange(chan%, start, endpos, fp%); ' Find out how many points and frames
+y% := FrameCount()+XCol%;
+if ((x% * y%) > 20000000) then      ' A safety check for too much memory used,
+    Message("Too many data points and frames"); ' you can disable this by commenting out
+    'return;                         ' but at your own risk!
+endif;
+
+var f%, i%;
+Var Export[x%][y%];                 ' The array to hold all the data
+
+if (XCol% > 0) then                 ' Firstly, if we want a times column
+    for i% := 0 to x%-1 do              '  build the list of times
+        Export[i%][0] := BinToX(chan%, fp%+i%);
+    next;
+endif;
+
+for f%:= 1 to Framecount() do       ' Next copy all of the data into the array
+    Frame(f%);                      ' Select the next frame
+    ArrConst(Export[][f%],View(data%,chan%).[fp%:x%]);  ' and copy the data
+next;
+
+for f% := 0 to y%-1 do          ' This loops through the columns
+state% := View(data%).FrameState(f%);
+    PrintLog("%d",state%);
+    PrintLog("\t");
+next;
+
+PrintLog("\n");
+
+for i% := 0 to x%-1 do              ' Now generate the text output - this loops through the rows
+    for f% := 0 to y%-1 do          ' This loops through the columns
+        if (f% > 0) then PrintLog("\t") endif;  ' Tab separator
+        PrintLog("%8g", Export[i%][f%]);
+        'print("%8g", Export[i%][f%])
+    next;
+    PrintLog("\n");                 ' New line after each row
+    'print("\n")
+next;
+
+'DlgCreate("Set name template for text output files");
+'DlgString(1,"Set file name template",20);
+'DlgShow(name$);
+
+'FilePathSet("",0,"Choose a directory for saving text files");             'Locate where you wish to save the files (sets the current directory)
+ 
+
+            
+
+FrontView(v11%);
+FileSaveAs(fName$);
+
+            
+next
