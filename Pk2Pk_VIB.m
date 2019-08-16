@@ -15,7 +15,7 @@ pulseend=511; %End 511=1.252s
 MEPstart=586; %Start of MEP 586=1.267s
 MEPend=726; %End 726=1.295s
 MaxPrecon=0.4; %Exclude trials where precon over this amplitude
-MinPulse=0.2; %This should be the smallest possible size of pulse artifact
+MinPulse=0.01; %This should be the smallest possible size of pulse artifact
 
 cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extracted data
 
@@ -113,18 +113,18 @@ cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extra
  
  %% Now save these matrices with the information for each state 
  
-cd ../PreProcessedData;
+cd ~/../../Volumes/Ainslie_USB/VibData/PreProcessedData;
  dlmwrite('MEPvibNO.txt', state1vals ,'delimiter', ',', 'precision', 6);      
- dlmwrite('MEPvibADM.txt', state2vals ,'delimiter', ',', 'precision', 6);                 
- dlmwrite('MEPvibFDI.txt', state3vals ,'delimiter', ',', 'precision', 6);  
+ dlmwrite('MEPvibADM.txt', state3vals ,'delimiter', ',', 'precision', 6);                 
+ dlmwrite('MEPvibFDI.txt', state5vals ,'delimiter', ',', 'precision', 6);  
+ dlmwrite('state2vals.txt', state2vals ,'delimiter', ',', 'precision', 6);      
  dlmwrite('state4vals.txt', state4vals ,'delimiter', ',', 'precision', 6);      
- dlmwrite('state5vals.txt', state5vals ,'delimiter', ',', 'precision', 6);      
  dlmwrite('state6vals.txt', state6vals ,'delimiter', ',', 'precision', 6);
  
  %calculate the SICI measures and save them too
- SICIvibNO=state4vals./state1vals;
- SICIvibADM=state5vals./state2vals;
- SICIvibFDI=state6vals./state3vals;
+ SICIvibNO=state2vals./state1vals;
+ SICIvibADM=state4vals./state3vals;
+ SICIvibFDI=state6vals./state5vals;
  
  dlmwrite('SICIvibNO.txt', SICIvibNO ,'delimiter', ',', 'precision', 6);      
  dlmwrite('SICIvibADM.txt', SICIvibADM ,'delimiter', ',', 'precision', 6);                 
