@@ -7,43 +7,61 @@
 %% Define some parameters
 clear all
 p1=3; %First ptp number
-pn=4;  %Last ptp number
-prestart=1; % Start of where we will look for precontractions 1=1.15s
-preend=376; % End precontraction window 376=1.225s
-pulsestart=490; %Start of where pulse artifact should be 490=1.2478s
-pulseend=511; %End 511=1.252s
-MEPstart=586; %Start of MEP 586=1.267s
-MEPend=726; %End 726=1.295s
-MaxPrecon=0.4; %Exclude trials where precon over this amplitude
-MinPulse=0.2; %This should be the smallest possible size of pulse artifact
+pn=4; %Last ptp number
+samp=5000; %sampling per sec
+prestart=1.172*samp; %Start of where we will look for precontractions 1.172s
+preend=1.246*samp; %End precontraction window 1.247s
+pulsestart=1.248*samp; %Start of where pulse artifact should be 1.2478s
+pulseend=1.252*samp; %End 1.252s
+MEPstart=1.266*samp; %Start of MEP 1.267s
+MEPend=1.295*samp; %End 1.295s
+MinPulse=0.1; %This should be the smallest possible size of pulse artifact
 
-cd ~/../../Volumes/Ainslie_USB/VibData/;
+cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extracted data
 
 %% Loop around ptps, sessions, timepoints, states, and muscles
 
  for i=[p1:pn] %ptps
     for s=1:2 %sessions
         for t=1:4 %timepoints
-            for state=1:2 %states
-               try 
-                for muscle=1:3 %musles, obvs
-   
+            if t==1
+              timept='Base';
+            elseif t==2
+              timept='During1';
+            elseif t==3
+              timept='During2'; 
+            elseif t==4
+              timept='Post';
+            end          
         %open first file
-        cd ~/../../Volumes/Ainslie_USB/VibData/ExtractedTxtData;
-        fileName=['P',num2str(i),'_S',num2str(s),'_SAI',num2str(t),'_ch',num2str(muscle),'.txt'];
-        data=load(fileName);
+        cd ~/../../Volumes/Ainslie_USB/VibData/;
+        fileName=['P',num2str(i),'_S',num2str(s),'_',timept,'VIB.mat'];
+        load(fileName);
+           
+            for state=1:6 %states  
+                try
+                for muscle=1:3 %musles, obvs
+                  
+        data=D.data(:,:,muscle);
     
         %find all the instances of the desired state and filter the data on
         %this basis
-        thesecol=logical(data(1,:)==state);
-        thisdata=data(2:end,thesecol);
+        thesecol=logical(D.state==state)';
+        pulsedata=D.data(:,thesecol,:);
+        thisdata=data(:,thesecol);
         [Srow, Scol]=size(thisdata);
         
-        %go through each frame in the data file and get the pk2pk amplitude of
-        %precontraction, pulse and MEP, in the time windows defined above
+        %get the mean root-mean-square for all the trials of a given
+        %muscle, then calulate the value above which we will reject a trial
+        RootMS=rms(data(prestart:preend,:));
+        MaxPrecon=mean(RootMS)+2*std(RootMS); 
+
+        %go through each frame in the data file and get the rms of the
+        %precontraction, pk2pk size of the largest pulse articact
+        %and pk2pk MEP size, in the time windows defined above
         for frame=1:Scol
-           preconsize=max(thisdata(prestart:preend,frame))-min(thisdata(prestart:preend,frame));
-           pulsesize=max(thisdata(pulsestart:pulseend,frame))-min(thisdata(pulsestart:pulseend,frame));
+           preconsize=rms(thisdata(prestart:preend,frame));
+           pulsesize=max(max(pulsedata(pulsestart:pulseend,frame,:))-min(pulsedata(pulsestart:pulseend,frame,:)));
            MEPsize=max(thisdata(MEPstart:MEPend,frame))-min(thisdata(MEPstart:MEPend,frame));
         
         %NaN any frames where there is precontraction or no pulse   
