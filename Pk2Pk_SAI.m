@@ -6,8 +6,8 @@
 
 %% Define some parameters
 clear all
-p1=3; %First ptp number
-pn=4; %Last ptp number
+p1=5; %First ptp number
+pn=30; %Last ptp number
 samp=5000; %sampling per sec
 prestart=1.172*samp; %Start of where we will look for precontractions 1.172s
 preend=1.246*samp; %End precontraction window 1.247s
@@ -16,12 +16,15 @@ pulseend=1.252*samp; %End 1.252s
 MEPstart=1.266*samp; %Start of MEP 1.267s
 MEPend=1.295*samp; %End 1.295s
 MinPulse=0.1; %This should be the smallest possible size of pulse artifact
+codebreak=[0,1,0,1,0,0,0,1,1,0,1,1,1,1,0,1,0,0,1,1,0,1,1,0,0,0]; %Is session 1 real stim?
+ptpcount=0;
 
 cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extracted data
 
 %% Loop around ptps, sessions, timepoints, states, and muscles
 
  for i=[p1:pn] %ptps
+     ptpcount=ptpcount+1;
     for s=1:2 %sessions
         for t=1:4 %timepoints
             if t==1
@@ -35,7 +38,7 @@ cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extra
             end          
         %open first file
         cd ~/../../Volumes/Ainslie_USB/VibData/;
-        fileName=['P',num2str(i),'_S',num2str(s),'_',timept,'VIB.mat'];
+        fileName=['P',num2str(i),'_S',num2str(s),'_',timept,'SAI.mat'];
         load(fileName);
            
             for state=1:6 %states  
@@ -103,29 +106,37 @@ cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extra
         clear muscleMEP stateMEP 
         catch
         meanstateMEPs=[NaN,NaN,NaN]; 
-        end 
+                end 
+        
+       %Break the code, find out which stim condition
+        if s==1
+            stim=codebreak(ptpcount);
+        else
+            stim=codebreak(ptpcount)-1;
+        end
         
         %now add these means into separate matricies for each state. These
         %are arranged with ptps in separate rows, then the columns
         %hierarchically session, then timepoint then muscle.        
-        startpos=(s-1)*12+(t-1)*3+1;
-        endpos=(s-1)*12+(t-1)*3+3;
+        startpos=abs(stim)*12+(t-1)*3+1;
+        endpos=abs(stim)*12+(t-1)*3+3;
         
         if state==1
-            state1vals(i,startpos:endpos)=meanstateMEPs;
+            state1vals(ptpcount,startpos:endpos)=meanstateMEPs;
         elseif state==2
-            state2vals(i,startpos:endpos)=meanstateMEPs;
+            state2vals(ptpcount,startpos:endpos)=meanstateMEPs;
         end
            end
           
         end  
      
     end 
+   disp(strcat('Analysis for ptp',num2str(i),' now complete. Total ptps analysed= ',num2str(ptpcount))) 
  end 
  
- %% Now save these matrices with the information for each state 
+ %% Now save these matrices with the information
  
- cd ../PreProcessedData;
+cd ~/../../Volumes/Ainslie_USB/VibData/PreProcessedData;
  dlmwrite('MEPnoSAI.txt', state1vals ,'delimiter', ',', 'precision', 6);      
  dlmwrite('MEPwithSAI.txt', state2vals ,'delimiter', ',', 'precision', 6);                 
  
@@ -133,4 +144,30 @@ cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extra
  SAIeffect=state2vals./state1vals;
  dlmwrite('SAIeffect.txt', SAIeffect ,'delimiter', ',', 'precision', 6);      
  
-    
+ BL_SAIeffect=[SAIeffect(:,4:6)-SAIeffect(:,1:3),SAIeffect(:,7:9)-SAIeffect(:,1:3),...
+        SAIeffect(:,10:12)-SAIeffect(:,1:3),SAIeffect(:,16:18)-SAIeffect(:,13:15),...
+     SAIeffect(:,19:21)-SAIeffect(:,13:15),SAIeffect(:,22:24)-SAIeffect(:,13:15)]; 
+ 
+ dlmwrite('BL_SAIeffect.txt',  BL_SAIeffect ,'delimiter', ',', 'precision', 6);  
+ 
+%% Convert the matrix to longform datasets for use in R
+T1_longform_SAI=[reshape(SAIeffect(:,1:3),[],1);reshape(SAIeffect(:,13:15),[],1)];
+BL_longform_SAI=reshape(BL_SAIeffect,[],1);
+
+T1_ptp_SAI=num2cell(repmat([5:30]',6,1));
+T1_tDCS_SAI=[repelem({'sham'},78,1);repelem({'real'},78,1)];
+T1_muscle_SAI=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],2,1);
+
+
+BL_ptp_SAI=num2cell(repmat([5:30]',18,1));
+BL_tDCS_SAI=repmat([repelem({'sham'},78,1);repelem({'real'},78,1)],3,1);
+BL_muscle_SAI=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],6,1);
+
+
+T1_tableSAI=table(T1_ptp_SAI, T1_tDCS_SAI, T1_muscle_SAI,T1_longform_SAI);
+T1_tableSAI.Properties.VariableNames = {'ptp','tDCS','muscle','DATA'};
+BL_tableSAI=table(BL_ptp_SAI, BL_tDCS_SAI, BL_muscle_SAI,BL_longform_SAI);
+BL_tableSAI.Properties.VariableNames = {'ptp','tDCS','muscle','DATA'};
+
+writetable(T1_tableSAI)
+writetable(BL_tableSAI)

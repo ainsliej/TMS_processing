@@ -7,7 +7,7 @@
 %% Define some parameters
 clear all
 p1=5; %First ptp number
-pn=5; %Last ptp number
+pn=30; %Last ptp number
 samp=5000; %sampling per sec
 prestart=1.172*samp; %Start of where we will look for precontractions 1.172s
 preend=1.246*samp; %End precontraction window 1.247s
@@ -16,12 +16,14 @@ pulseend=1.252*samp; %End 1.252s
 MEPstart=1.266*samp; %Start of MEP 1.267s
 MEPend=1.295*samp; %End 1.295s
 MinPulse=0.1; %This should be the smallest possible size of pulse artifact
-
+codebreak=[0,1,0,1,0,0,0,1,1,0,1,1,1,1,0,1,0,0,1,1,0,1,1,0,0,0]; %Is session 1 real stim?
+ptpcount=0;
 cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extracted data
 
 %% Loop around ptps, sessions, timepoints, states, and muscles
 
  for i=[p1:pn] %ptps
+     ptpcount=ptpcount+1;
     for s=1:2 %sessions
         for t=1:4 %timepoints
             if t==1
@@ -102,31 +104,38 @@ cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extra
         clear muscleMEP stateMEP 
         catch
               meanstateMEPs=[NaN,NaN,NaN]; 
-        end 
+                end 
         
+        %Break the code, find out which stim condition
+        if s==1
+            stim=codebreak(ptpcount);
+        else
+            stim=codebreak(ptpcount)-1;
+        end
+                
         %now add these means into separate matricies for each state. These
         %are arranged with ptps in separate rows, then the columns
-        %hierarchically session, then timepoint then muscle. 
-        startpos=(s-1)*12+(t-1)*3+1;
-        endpos=(s-1)*12+(t-1)*3+3;        
+        %hierarchically stim type (sham, real), then timepoint then muscle. 
+        startpos=abs(stim)*12+(t-1)*3+1;
+        endpos=abs(stim)*12+(t-1)*3+3;        
         if state==1
-            state1vals(i,startpos:endpos)=meanstateMEPs;
+            state1vals(ptpcount,startpos:endpos)=meanstateMEPs;
         elseif state==2
-            state2vals(i,startpos:endpos)=meanstateMEPs;
+            state2vals(ptpcount,startpos:endpos)=meanstateMEPs;
         elseif state==3
-            state3vals(i,startpos:endpos)=meanstateMEPs; 
+            state3vals(ptpcount,startpos:endpos)=meanstateMEPs; 
         elseif state==4
-            state4vals(i,startpos:endpos)=meanstateMEPs;
+            state4vals(ptpcount,startpos:endpos)=meanstateMEPs;
         elseif state==5
-            state5vals(i,startpos:endpos)=meanstateMEPs;    
+            state5vals(ptpcount,startpos:endpos)=meanstateMEPs;    
         elseif state==6
-            state6vals(i,startpos:endpos)=meanstateMEPs;
+            state6vals(ptpcount,startpos:endpos)=meanstateMEPs;
         end     
             end
           
         end  
-     
     end 
+      disp(strcat('Analysis for ptp',num2str(i),' now complete. Total ptps analysed= ',num2str(ptpcount)))
  end 
  
  %% Now save these matrices with the information for each state 
@@ -135,9 +144,9 @@ cd ~/../../Volumes/Ainslie_USB/VibData/PreProcessedData;
  dlmwrite('MEPvibNO.txt', state1vals ,'delimiter', ',', 'precision', 6);      
  dlmwrite('MEPvibADM.txt', state3vals ,'delimiter', ',', 'precision', 6);                 
  dlmwrite('MEPvibFDI.txt', state5vals ,'delimiter', ',', 'precision', 6);  
- dlmwrite('state2vals.txt', state2vals ,'delimiter', ',', 'precision', 6);      
- dlmwrite('state4vals.txt', state4vals ,'delimiter', ',', 'precision', 6);      
- dlmwrite('state6vals.txt', state6vals ,'delimiter', ',', 'precision', 6);
+ dlmwrite('state2valsVIB.txt', state2vals ,'delimiter', ',', 'precision', 6);      
+ dlmwrite('state4valsVIB.txt', state4vals ,'delimiter', ',', 'precision', 6);      
+ dlmwrite('state6valsVIB.txt', state6vals ,'delimiter', ',', 'precision', 6);
  
  %calculate the SICI measures and save them too
  SICIvibNO=state2vals./state1vals;
@@ -147,4 +156,77 @@ cd ~/../../Volumes/Ainslie_USB/VibData/PreProcessedData;
  dlmwrite('SICIvibNO.txt', SICIvibNO ,'delimiter', ',', 'precision', 6);      
  dlmwrite('SICIvibADM.txt', SICIvibADM ,'delimiter', ',', 'precision', 6);                 
  dlmwrite('SICIvibFDI.txt', SICIvibFDI ,'delimiter', ',', 'precision', 6); 
-    
+ 
+ 
+ %% Save the change from BL values 
+ 
+ BL_MEPvibNO=[state1vals(:,4:6)-state1vals(:,1:3),state1vals(:,7:9)-state1vals(:,1:3),...
+     state1vals(:,10:12)-state1vals(:,1:3),state1vals(:,16:18)-state1vals(:,13:15),...
+     state1vals(:,19:21)-state1vals(:,13:15),state1vals(:,22:24)-state1vals(:,13:15)];
+ BL_MEPvibADM=[state3vals(:,4:6)-state3vals(:,1:3),state3vals(:,7:9)-state3vals(:,1:3),...
+     state3vals(:,10:12)-state3vals(:,1:3),state3vals(:,16:18)-state3vals(:,13:15),...
+     state3vals(:,19:21)-state3vals(:,13:15),state3vals(:,22:24)-state3vals(:,13:15)]; 
+ BL_MEPvibFDI=[state5vals(:,4:6)-state5vals(:,1:3),state5vals(:,7:9)-state5vals(:,1:3),...
+     state5vals(:,10:12)-state5vals(:,1:3),state5vals(:,16:18)-state5vals(:,13:15),...
+     state5vals(:,19:21)-state5vals(:,13:15),state5vals(:,22:24)-state5vals(:,13:15)]; 
+ 
+ BL_SICIvibNO=[SICIvibNO(:,4:6)-SICIvibNO(:,1:3),SICIvibNO(:,7:9)-SICIvibNO(:,1:3),...
+     SICIvibNO(:,10:12)-SICIvibNO(:,1:3),SICIvibNO(:,16:18)-SICIvibNO(:,13:15),...
+     SICIvibNO(:,19:21)-SICIvibNO(:,13:15),SICIvibNO(:,22:24)-SICIvibNO(:,13:15)]; 
+ BL_SICIvibADM=[SICIvibADM(:,4:6)-SICIvibADM(:,1:3),SICIvibADM(:,7:9)-SICIvibADM(:,1:3),...
+     SICIvibADM(:,10:12)-SICIvibADM(:,1:3),SICIvibADM(:,16:18)-SICIvibADM(:,13:15),...
+     SICIvibADM(:,19:21)-SICIvibADM(:,13:15),SICIvibADM(:,22:24)-SICIvibADM(:,13:15)];  
+ BL_SICIvibFDI=[SICIvibFDI(:,4:6)-SICIvibFDI(:,1:3),SICIvibFDI(:,7:9)-SICIvibFDI(:,1:3),...
+     SICIvibFDI(:,10:12)-SICIvibFDI(:,1:3),SICIvibFDI(:,16:18)-SICIvibFDI(:,13:15),...
+     SICIvibFDI(:,19:21)-SICIvibFDI(:,13:15),SICIvibFDI(:,22:24)-SICIvibFDI(:,13:15)];  
+ 
+ dlmwrite('BL_MEPvibNO.txt',  BL_MEPvibNO ,'delimiter', ',', 'precision', 6);      
+ dlmwrite('BL_MEPvibADM.txt',  BL_MEPvibADM ,'delimiter', ',', 'precision', 6);                 
+ dlmwrite('BL_MEPvibFDI.txt',  BL_MEPvibFDI ,'delimiter', ',', 'precision', 6);  
+  
+ dlmwrite('BL_SICIvibNO.txt', BL_SICIvibNO ,'delimiter', ',', 'precision', 6);      
+ dlmwrite('BL_SICIvibADM.txt', BL_SICIvibADM ,'delimiter', ',', 'precision', 6);                 
+ dlmwrite('BL_SICIvibFDI.txt', BL_SICIvibFDI ,'delimiter', ',', 'precision', 6); 
+ 
+ %% Convert the matricies to longform datasets for use in R
+ 
+ %Data from T1 timepoint
+ 
+T1_longform_SP=[reshape(state1vals(:,1:3),[],1);reshape(state1vals(:,13:15),[],1);...
+     reshape(state3vals(:,1:3),[],1);reshape(state3vals(:,13:15),[],1);...
+     reshape(state5vals(:,1:3),[],1);reshape(state5vals(:,13:15),[],1)];
+ 
+T1_longform_SICI=[reshape(SICIvibNO(:,1:3),[],1);reshape(SICIvibNO(:,13:15),[],1);...
+     reshape(SICIvibADM(:,1:3),[],1);reshape(SICIvibADM(:,13:15),[],1);...
+     reshape(SICIvibFDI(:,1:3),[],1);reshape(SICIvibFDI(:,13:15),[],1)];
+ 
+T1_ptp_VIB=num2cell(repmat([5:30]',18,1));
+T1_tDCS_VIB=repmat([repelem({'sham'},78,1);repelem({'real'},78,1)],3,1);
+T1_muscle_VIB=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],6,1);
+T1_vib_VIB=repelem({'vibNO';'vibADM';'vibFDI'},156,1);
+
+T1_SP_tableVIB=table(T1_ptp_VIB, T1_tDCS_VIB, T1_vib_VIB, T1_muscle_VIB,T1_longform_SP);
+T1_SP_tableVIB.Properties.VariableNames = {'ptp','tDCS','vibCond','muscle','DATA'};
+T1_SICI_tableVIB=table(T1_ptp_VIB, T1_tDCS_VIB, T1_vib_VIB, T1_muscle_VIB,T1_longform_SICI);
+T1_SICI_tableVIB.Properties.VariableNames = {'ptp','tDCS','vibCond','muscle','DATA'};
+
+writetable(T1_SP_tableVIB)
+writetable(T1_SICI_tableVIB)
+
+ %Column layout: Ptp, VibCondition, tDCS_stim, TimePT, Muscle, VibCondition, Data 
+ 
+BL_longform_SP=[reshape(BL_MEPvibNO,[],1);reshape(BL_MEPvibADM,[],1);reshape(BL_MEPvibFDI,[],1)];
+BL_longform_SICI=[reshape(BL_SICIvibNO,[],1);reshape(BL_SICIvibADM,[],1);reshape(BL_SICIvibFDI,[],1)];
+
+BL_ptp_VIB=num2cell(repmat([5:30]',54,1));
+BL_tDCS_VIB=repmat([repelem({'sham'},234,1);repelem({'real'},234,1)],3,1);
+BL_muscle_VIB=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],18,1);
+BL_vib_VIB=repelem({'vibNO';'vibADM';'vibFDI'},468,1);
+ 
+BL_SP_tableVIB=table(BL_ptp_VIB, BL_tDCS_VIB, BL_vib_VIB, BL_muscle_VIB,BL_longform_SP);
+BL_SP_tableVIB.Properties.VariableNames = {'ptp','tDCS','vibCond','muscle','DATA'};
+BL_SICI_tableVIB=table(BL_ptp_VIB, BL_tDCS_VIB, BL_vib_VIB, BL_muscle_VIB,BL_longform_SICI);
+BL_SICI_tableVIB.Properties.VariableNames = {'ptp','tDCS','vibCond','muscle','DATA'};
+
+writetable(BL_SP_tableVIB)
+writetable(BL_SICI_tableVIB)
