@@ -88,16 +88,9 @@ cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extra
         cd ~/../../Volumes/Ainslie_USB/VibData/PreProcessedData/IndividualStates;
         dlmwrite(fileName, stateMEP ,'delimiter', ',', 'precision', 6);
         
-        %calculate the mean for each muscle from the above.
-        %filtering also done here
-        initmeanMEP=mean(stateMEP,1,'omitnan');
-        stdMEP=std(stateMEP, 1,'omitnan');
-        noHighMEP=stateMEP;
-        noHighMEP(stateMEP>initmeanMEP+2*stdMEP)=NaN; %remove MEP>2sd above mean
-        noLowMEP=noHighMEP;
-        noLowMEP(stateMEP<initmeanMEP-2*stdMEP)=NaN; %remove MEP<2sd below mean
-        grubbsMEP=isoutlier(noLowMEP,1); %Grubbs test N.B. only on matlab_2018R
-        noGrubbsMEP=noLowMEP;
+        %filtering done here
+        grubbsMEP=isoutlier(stateMEP,1); %Grubbs test N.B. only on matlab_2018R
+        noGrubbsMEP=stateMEP;
         noGrubbsMEP(grubbsMEP==1)=NaN; 
         
         meanstateMEPs=mean(noGrubbsMEP,1,'omitnan');

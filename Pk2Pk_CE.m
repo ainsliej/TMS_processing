@@ -77,28 +77,21 @@ cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extra
         
         %create a matrix of the MEP sizes for each muscle. FDI, APB, ADM. 
         %This should be a 15x3 matrix as there should be 15 CE pulses
-        CE_MEP=muscleMEP(length(muscleMEP)-14:length(muscleMEP));
+        CE_MEP(:,muscle)=muscleMEP(length(muscleMEP)-14:length(muscleMEP));
         end
         
          %save the matrix with the MEP sizes for each timept, session and ptp            
         fileName=['P',num2str(i),'_S',num2str(s),'_CE',num2str(t),'.txt'] ;
         cd ~/../../Volumes/Ainslie_USB/VibData/PreProcessedData/IndividualStates;
-        dlmwrite(fileName, stateMEP ,'delimiter', ',', 'precision', 6);
+        dlmwrite(fileName, CE_MEP ,'delimiter', ',', 'precision', 6);
         
-         %calculate the mean for each muscle from the above.
-        %filtering also done here
-        initmeanMEP=mean(CE_MEP,1,'omitnan');
-        stdMEP=std(CE_MEP, 1,'omitnan');
-        noHighMEP=CE_MEP;
-        noHighMEP(CE_MEP>initmeanMEP+2*stdMEP)=NaN; %remove MEP>2sd above mean
-        noLowMEP=noHighMEP;
-        noLowMEP(CE_MEP<initmeanMEP-2*stdMEP)=NaN; %remove MEP<2sd below mean
-        grubbsMEP=isoutlier(noLowMEP,1); %Grubbs test N.B. only on matlab_2018R
-        noGrubbsMEP=noLowMEP;
+        %filtering done here
+        grubbsMEP=isoutlier(CE_MEP,1); %Grubbs test N.B. only on matlab_2018R
+        noGrubbsMEP=CE_MEP;
         noGrubbsMEP(grubbsMEP==1)=NaN; 
         
         meanstateMEPs=mean(noGrubbsMEP,1,'omitnan');
-        clear CE_MEP 
+        clear CE_MEP muscleMEP
         
         catch
               meanstateMEPs=[NaN,NaN,NaN]; 
