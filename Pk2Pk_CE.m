@@ -15,7 +15,7 @@ pulsestart=1.248*samp; %Start of where pulse artifact should be 1.2478s
 pulseend=1.252*samp; %End 1.252s
 MEPstart=1.266*samp; %Start of MEP 1.267s
 MEPend=1.295*samp; %End 1.295s
-MinPulse=0.1; %This should be the smallest possible size of pulse artifact
+MinPulse=0.3; %This should be the smallest possible size of pulse artifact
 codebreak=[0,1,0,1,0,0,0,1,1,0,1,1,1,1,0,1,0,0,1,1,0,1,1,0,0,0]; %Is session 1 real stim?
 ptpcount=0;
 cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extracted data
@@ -124,9 +124,9 @@ cd ~/../../Volumes/Ainslie_USB/VibData/; %Directory containing folder with extra
        
      dlmwrite('MEP_CE.txt', CEvals ,'delimiter', ',', 'precision', 6);        
        
-  BL_CEvals=[CEvals(:,4:6)-CEvals(:,1:3),CEvals(:,7:9)-CEvals(:,1:3),...
-        CEvals(:,10:12)-CEvals(:,1:3),CEvals(:,16:18)-CEvals(:,13:15),...
-     CEvals(:,19:21)-CEvals(:,13:15),CEvals(:,22:24)-CEvals(:,13:15)]; 
+  BL_CEvals=[CEvals(:,4:6)./CEvals(:,1:3),CEvals(:,7:9)./CEvals(:,1:3),...
+        CEvals(:,10:12)./CEvals(:,1:3),CEvals(:,16:18)./CEvals(:,13:15),...
+     CEvals(:,19:21)./CEvals(:,13:15),CEvals(:,22:24)./CEvals(:,13:15)]; 
   
   dlmwrite('BL_CEvals.txt',  BL_CEvals ,'delimiter', ',', 'precision', 6); 
   
@@ -139,16 +139,26 @@ T1_ptp_CE=num2cell(repmat([5:30]',6,1));
 T1_tDCS_CE=[repelem({'sham'},78,1);repelem({'real'},78,1)];
 T1_muscle_CE=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],2,1);
 
-
 BL_ptp_CE=num2cell(repmat([5:30]',18,1));
-BL_tDCS_CE=repmat([repelem({'sham'},78,1);repelem({'real'},78,1)],3,1);
+BL_tDCS_CE=[repelem({'sham'},234,1);repelem({'real'},234,1)];
 BL_muscle_CE=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],6,1);
-
+BL_time_CE= repmat([repelem({'T2'},78,1);repelem({'T3'},78,1);repelem({'T4'},78,1)],2,1);
 
 T1_tableCE=table(T1_ptp_CE, T1_tDCS_CE, T1_muscle_CE,T1_longform_CE);
 T1_tableCE.Properties.VariableNames = {'ptp','tDCS','muscle','DATA'};
-BL_tableCE=table(BL_ptp_CE, BL_tDCS_CE, BL_muscle_CE,BL_longform_CE);
-BL_tableCE.Properties.VariableNames = {'ptp','tDCS','muscle','DATA'};
+BL_tableCE=table(BL_ptp_CE, BL_tDCS_CE, BL_muscle_CE,BL_time_CE, BL_longform_CE);
+BL_tableCE.Properties.VariableNames = {'ptp','tDCS','muscle','timept','DATA'};
  
 writetable(T1_tableCE)
 writetable(BL_tableCE)
+
+ALL_longform_CE=reshape(CEvals,[],1)
+
+ALL_ptp_CE=num2cell(repmat([5:30]',24,1));
+ALL_tDCS_CE=[repelem({'sham'},312,1);repelem({'real'},312,1)];
+ALL_muscle_CE=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],8,1);
+ALL_time_CE= repmat([repelem({'T1'},78,1);repelem({'T2'},78,1);repelem({'T3'},78,1);repelem({'T4'},78,1)],2,1);
+
+ALL_tableCE=table(ALL_ptp_CE, ALL_tDCS_CE, ALL_muscle_CE,ALL_time_CE, ALL_longform_CE);
+ALL_tableCE.Properties.VariableNames = {'ptp','tDCS','muscle','timept','DATA'};
+writetable(ALL_tableCE)

@@ -15,7 +15,7 @@ pulsestart=1.248*samp; %Start of where pulse artifact should be 1.2478s
 pulseend=1.252*samp; %End 1.252s
 MEPstart=1.266*samp; %Start of MEP 1.267s
 MEPend=1.295*samp; %End 1.295s
-MinPulse=0.1; %This should be the smallest possible size of pulse artifact
+MinPulse=0.3; %This should be the smallest possible size of pulse artifact
 codebreak=[0,1,0,1,0,0,0,1,1,0,1,1,1,1,0,1,0,0,1,1,0,1,1,0,0,0]; %Is session 1 real stim?
 ptpcount=0;
 
@@ -136,9 +136,9 @@ cd ~/../../Volumes/Ainslie_USB/VibData/PreProcessedData;
  SAIeffect=state2vals./state1vals;
  dlmwrite('SAIeffect.txt', SAIeffect ,'delimiter', ',', 'precision', 6);      
  
- BL_SAIeffect=[SAIeffect(:,4:6)-SAIeffect(:,1:3),SAIeffect(:,7:9)-SAIeffect(:,1:3),...
-        SAIeffect(:,10:12)-SAIeffect(:,1:3),SAIeffect(:,16:18)-SAIeffect(:,13:15),...
-     SAIeffect(:,19:21)-SAIeffect(:,13:15),SAIeffect(:,22:24)-SAIeffect(:,13:15)]; 
+ BL_SAIeffect=[SAIeffect(:,4:6)./SAIeffect(:,1:3),SAIeffect(:,7:9)./SAIeffect(:,1:3),...
+        SAIeffect(:,10:12)./SAIeffect(:,1:3),SAIeffect(:,16:18)./SAIeffect(:,13:15),...
+     SAIeffect(:,19:21)./SAIeffect(:,13:15),SAIeffect(:,22:24)./SAIeffect(:,13:15)]; 
  
  dlmwrite('BL_SAIeffect.txt',  BL_SAIeffect ,'delimiter', ',', 'precision', 6);  
  
@@ -150,16 +150,38 @@ T1_ptp_SAI=num2cell(repmat([5:30]',6,1));
 T1_tDCS_SAI=[repelem({'sham'},78,1);repelem({'real'},78,1)];
 T1_muscle_SAI=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],2,1);
 
-
 BL_ptp_SAI=num2cell(repmat([5:30]',18,1));
-BL_tDCS_SAI=repmat([repelem({'sham'},78,1);repelem({'real'},78,1)],3,1);
+BL_tDCS_SAI=[repelem({'sham'},234,1);repelem({'real'},234,1)];
 BL_muscle_SAI=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],6,1);
-
+BL_time_SAI= repmat([repelem({'T2'},78,1);repelem({'T3'},78,1);repelem({'T4'},78,1)],2,1);
 
 T1_tableSAI=table(T1_ptp_SAI, T1_tDCS_SAI, T1_muscle_SAI,T1_longform_SAI);
 T1_tableSAI.Properties.VariableNames = {'ptp','tDCS','muscle','DATA'};
-BL_tableSAI=table(BL_ptp_SAI, BL_tDCS_SAI, BL_muscle_SAI,BL_longform_SAI);
-BL_tableSAI.Properties.VariableNames = {'ptp','tDCS','muscle','DATA'};
+BL_tableSAI=table(BL_ptp_SAI, BL_tDCS_SAI, BL_muscle_SAI, BL_time_SAI,BL_longform_SAI);
+BL_tableSAI.Properties.VariableNames = {'ptp','tDCS','muscle','timept','DATA'};
 
 writetable(T1_tableSAI)
 writetable(BL_tableSAI)
+
+
+ALL_longform_SAI=reshape(SAIeffect,[],1);
+ALL_longform_SAIwoMNS=reshape(state1vals,[],1);
+ALL_longform_SAIwMNS=reshape(state2vals,[],1);
+
+ALL_ptp_SAI=num2cell(repmat([5:30]',24,1));
+ALL_tDCS_SAI=[repelem({'sham'},312,1);repelem({'real'},312,1)];
+ALL_muscle_SAI=repmat([repelem({'FDI'},26,1);repelem({'APB'},26,1);repelem({'ADM'},26,1)],8,1);
+ALL_time_SAI= repmat([repelem({'T1'},78,1);repelem({'T2'},78,1);repelem({'T3'},78,1);repelem({'T4'},78,1)],2,1);
+
+ALL_tableSAI=table(ALL_ptp_SAI, ALL_tDCS_SAI, ALL_muscle_SAI,ALL_time_SAI,ALL_longform_SAI);
+ALL_tableSAI.Properties.VariableNames = {'ptp','tDCS','muscle','timept','DATA'};
+
+ALL_tableSAIwoMNS=table(ALL_ptp_SAI, ALL_tDCS_SAI, ALL_muscle_SAI,ALL_time_SAI,ALL_longform_SAIwoMNS);
+ALL_tableSAIwMNS=table(ALL_ptp_SAI, ALL_tDCS_SAI, ALL_muscle_SAI,ALL_time_SAI,ALL_longform_SAIwMNS);
+ALL_tableSAIwoMNS.Properties.VariableNames = {'ptp','tDCS','muscle','timept','DATA'};
+ALL_tableSAIwMNS.Properties.VariableNames = {'ptp','tDCS','muscle','timept','DATA'};
+
+writetable(ALL_tableSAI)
+writetable(ALL_tableSAIwoMNS)
+writetable(ALL_tableSAIwMNS)
+
