@@ -18,7 +18,9 @@ T1_CE<-subset(ALL_CE,timept=="T1")
 
 ggplot(T1_CE, aes(x=muscle, y=DATA, group=interaction(tDCS,muscle)))+
   geom_violin(position="dodge",aes(fill=factor(tDCS))) +theme_minimal()+
-  geom_jitter(inherit.aes=TRUE)
+  geom_jitter(inherit.aes=TRUE)+
+  labs(title='Baseline CE, split by muscle',
+       x='time point', y='MEP size in mV')
  
 modelAOV_T1CE<-aov(DATA~muscle*tDCS+Error(ptp), data=T1_CE)
 print("Check whether there is any CE differences at T1")
@@ -39,6 +41,7 @@ ggplot(means_ALL_CE, aes(x=timept, y=DATA, group=tDCS, color=tDCS, shape=muscle)
   facet_wrap(facets= vars(muscle))+ ylim(0,1.5)+
   labs(title='The effect of tDCS on coritcospinal excitability, split by muscle',
        x='time point', y='MEP size in mV')
+
 
 modelAOV_ALLCE<-aov(DATA~timept*tDCS*muscle+Error(ptp), data=ALL_CE)
 print("Check whether there is any effect of tDCS on CE")
@@ -75,12 +78,6 @@ ggplot(means_BL_CE, aes(x=timept, y=DATA, group=tDCS, color=tDCS, shape=muscle))
 modelAOV_BLCE<-aov(DATA~timept*tDCS+Error(ptp), data=BL_CE_FDI)
 print("Check whether there is any effect of baselined CE")
 print(summary(modelAOV_BLCE))
-
-
-
-
-
-
 
 
 

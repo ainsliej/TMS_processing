@@ -19,7 +19,9 @@ ALL_SAI_FDI<-subset(ALL_CE,muscle=="FDI")
 
 ggplot(T1_CE, aes(x=muscle, y=DATA, group=interaction(tDCS,muscle)))+
   geom_violin(position="dodge",aes(fill=factor(tDCS))) +theme_minimal()+
-  geom_jitter(inherit.aes=TRUE)
+  geom_jitter(inherit.aes=TRUE)+
+  labs(title='Baseline SAI, split by muscle',
+       x='time point', y='MEP+MNS / MEP ')
 
 modelAOV_T1SAI<-aov(DATA~muscle*tDCS+Error(ptp), data=T1_SAI)
 print("Check whether there is any SAI differences at T1")

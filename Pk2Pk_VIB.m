@@ -154,6 +154,17 @@ cd ~/../../Volumes/Ainslie_USB/VibData/PreProcessedData;
  
  %% Save the change from BL values 
  
+% state1vals = dlmread('MEPvibNO.txt', ',');      
+% state3vals = dlmread('MEPvibADM.txt', ',');                 
+% state5vals= dlmread('MEPvibFDI.txt', ',');  
+% state2vals = dlmread('state2valsVIB.txt', ',');      
+% state4vals= dlmread('state4valsVIB.txt', ',');      
+% state6vals= dlmread('state6valsVIB.txt',  ',');
+%   
+% SICIvibNO= dlmread('SICIvibNO.txt', ',');      
+% SICIvibADM= dlmread('SICIvibADM.txt',  ',');                 
+% SICIvibFDI= dlmread('SICIvibFDI.txt', ','); 
+%  
  BL_MEPvibNO=[state1vals(:,4:6)./state1vals(:,1:3),state1vals(:,7:9)./state1vals(:,1:3),...
      state1vals(:,10:12)./state1vals(:,1:3),state1vals(:,16:18)./state1vals(:,13:15),...
      state1vals(:,19:21)./state1vals(:,13:15),state1vals(:,22:24)./state1vals(:,13:15)];
@@ -200,7 +211,7 @@ BL_SP_vibFDIeffect=[vibFDIeffect_SP(:,4:6)./vibFDIeffect_SP(:,1:3),vibFDIeffect_
 BL_SICI_vibADMeffect=[vibADMeffect_SICI(:,4:6)./vibADMeffect_SICI(:,1:3),vibADMeffect_SICI(:,7:9)./vibADMeffect_SICI(:,1:3),...
      vibADMeffect_SICI(:,10:12)./vibADMeffect_SICI(:,1:3),vibADMeffect_SICI(:,16:18)./vibADMeffect_SICI(:,13:15),...
      vibADMeffect_SICI(:,19:21)./vibADMeffect_SICI(:,13:15),vibADMeffect_SICI(:,22:24)./vibADMeffect_SICI(:,13:15)]; 
-BL_SICI_vibFDIeffect=[vibFDIeffect_SICI(:,4:6)./vibFDIeffect_SICI(:,1:3),vibADMeffect_SICI(:,7:9)./vibADMeffect_SICI(:,1:3),...
+BL_SICI_vibFDIeffect=[vibFDIeffect_SICI(:,4:6)./vibFDIeffect_SICI(:,1:3),vibFDIeffect_SICI(:,7:9)./vibFDIeffect_SICI(:,1:3),...
     vibFDIeffect_SICI(:,10:12)./vibFDIeffect_SICI(:,1:3),vibFDIeffect_SICI(:,16:18)./vibFDIeffect_SICI(:,13:15),...
      vibFDIeffect_SICI(:,19:21)./vibFDIeffect_SICI(:,13:15),vibFDIeffect_SICI(:,22:24)./vibFDIeffect_SICI(:,13:15)];   
  

@@ -21,23 +21,23 @@ modelAOV_ALL_SP_noVIB_FDI<-aov(DATA~timept*tDCS+Error(ptp), data=ALL_SP_noVIB_FD
 print("A check that sp MEPs do not change across the session")
 print(summary(modelAOV_ALL_SP_noVIB_FDI))
 
-means_ALL_SP_noVIB_FDI<- summarySEwithin(ALL_SP_noVIB_FDI, measurevar="DATA", 
-                               withinvars=c( "tDCS", "timept"), idvar="ptp")
 
 ggplot(means_ALL_SP_noVIB_FDI, aes(x=timept, y=DATA, group=tDCS, color=tDCS)) + 
   geom_errorbar(aes(ymin=DATA-se, ymax=DATA+se), width=.1, 
                 position=position_dodge(0.05)) +
   geom_line() + geom_point()+
   scale_color_brewer(palette="Paired")+theme_minimal()+ 
-  labs(title='The effect of tDCS on coritcospinal excitability, split by muscle',
+  labs(title='spMEPs from the VIB condition across the experiment, split by muscle',
        x='time point', y='MEP size in mV')
+
+
+means_ALL_SP_noVIB_FDI<- summarySEwithin(ALL_SP_noVIB_FDI, measurevar="DATA", 
+                               withinvars=c( "tDCS", "timept"), idvar="ptp")
+
 
 #Check whether we get vibration effect at the T1 timepoint
 
 T1_SP_VIB<-subset(ALL_SP_VIB,timept=="T1")
-modelAOV_T1_SP_VIB<-aov(DATA~muscle*vibCond*tDCS+Error(ptp), data=T1_SP_VIB)
-print("A check that we are getting the VIB effect at baseline")
-print(summary(modelAOV_T1_SP_VIB))
 
 means_ALL_SP_VIB<- summarySEwithin(ALL_SP_VIB, measurevar="DATA", 
                                    withinvars=c( "tDCS", "timept", "muscle", "vibCond"), idvar="ptp")
@@ -48,6 +48,11 @@ ggplot(subset(means_ALL_SP_VIB,timept==("T1")), aes(x=muscle, y=DATA, fill=muscl
   facet_grid(rows=vars(vibCond),cols=vars(tDCS)) + 
   labs(title='MEPs at baseline, split by stim condition and vib condition',
        x='time point', y='MEP size in mV')
+
+modelAOV_T1_SP_VIB<-aov(DATA~muscle*vibCond*tDCS+Error(ptp), data=T1_SP_VIB)
+print("A check that we are getting the VIB effect at baseline")
+print(summary(modelAOV_T1_SP_VIB))
+
 
 #Analysis of VIBeffect SP data at the T1 timepoint
 
@@ -86,12 +91,8 @@ ALL_SICI_VIB$vibCond<- factor(ALL_SICI_VIB$vibCond)
 ALL_SICI_VIB$timept<- factor(ALL_SICI_VIB$timept)
 
 T1_SP_VIB<-subset(ALL_SP_VIB,timept=="T1")
-modelAOV_T1_SP_VIB<-aov(DATA~muscle*vibCond*tDCS+Error(ptp), data=T1_SP_VIB)
-print("A check that we are getting the VIB on SICI at baseline")
-print(summary(modelAOV_T1_SP_VIB))
-
 means_ALL_SICI_VIB<- summarySEwithin(ALL_SICI_VIB, measurevar="DATA", 
-                                           withinvars=c( "tDCS", "timept", "vibCond","muscle"), idvar="ptp")
+                                     withinvars=c( "tDCS", "timept", "vibCond","muscle"), idvar="ptp")
 
 ggplot(subset(means_ALL_SICI_VIB,timept==("T1")), aes(x=muscle, y=DATA, fill=muscle)) + 
   geom_errorbar(aes(ymin=DATA-se, ymax=DATA+se)) +
@@ -101,20 +102,26 @@ ggplot(subset(means_ALL_SICI_VIB,timept==("T1")), aes(x=muscle, y=DATA, fill=mus
   labs(title='SICI baseline, split by stim condition and vib condition',
        x='time point', y='ppMEP/spMEP')
 
+modelAOV_T1_SP_VIB<-aov(DATA~muscle*vibCond*tDCS+Error(ptp), data=T1_SP_VIB)
+print("A check that we are getting the VIB on SICI at baseline")
+print(summary(modelAOV_T1_SP_VIB))
+
+
+
 #Visualisng the vibration effect of SICI measures at T1
 
-ALL_SP_VIBeffect <- read.delim('ALL_SP_tableVIBeffect.txt', header=TRUE, sep=',' )
+ALL_SICI_VIBeffect <- read.delim('ALL_SICI_tableVIBeffect.txt', header=TRUE, sep=',' )
 
-ALL_SP_VIBeffect$muscle<-factor(ALL_SP_VIBeffect$muscle)
-ALL_SP_VIBeffect$tDCS<- factor(ALL_SP_VIBeffect$tDCS)
-ALL_SP_VIBeffect$ptp<- factor(ALL_SP_VIBeffect$ptp)
-ALL_SP_VIBeffect$vibCond<- factor(ALL_SP_VIBeffect$vibCond)
-ALL_SP_VIBeffect$timept<- factor(ALL_SP_VIBeffect$timept)
+ALL_SICI_VIBeffect$muscle<-factor(ALL_SICI_VIBeffect$muscle)
+ALL_SICI_VIBeffect$tDCS<- factor(ALL_SICI_VIBeffect$tDCS)
+ALL_SICI_VIBeffect$ptp<- factor(ALL_SICI_VIBeffect$ptp)
+ALL_SICI_VIBeffect$vibCond<- factor(ALL_SICI_VIBeffect$vibCond)
+ALL_SICI_VIBeffect$timept<- factor(ALL_SICI_VIBeffect$timept)
 
-means_ALL_SP_VIBeffect<- summarySEwithin(ALL_SP_VIBeffect, measurevar="DATA", 
+means_ALL_SICI_VIBeffect<- summarySEwithin(ALL_SICI_VIBeffect, measurevar="DATA", 
                                          withinvars=c( "tDCS", "timept", "muscle", "vibCond"), idvar="ptp")
 
-ggplot(subset(means_ALL_SICI_VIB,timept==("T1")), aes(x=muscle, y=DATA, fill=muscle)) + 
+ggplot(subset(means_ALL_SICI_VIBeffect,timept==("T1")), aes(x=muscle, y=DATA, fill=muscle)) + 
   geom_errorbar(aes(ymin=DATA-se, ymax=DATA+se)) +
   geom_bar(stat='identity')+ 
   scale_color_brewer(palette="Paired")+theme_minimal()+
@@ -194,7 +201,7 @@ BL_SP_VIBeffect <- read.delim('BL_SP_tableVIBeffect.txt', header=TRUE, sep=',' )
 BL_SP_VIBeffect$muscle<-factor(BL_SP_VIBeffect$muscle)
 BL_SP_VIBeffect$tDCS<- factor(BL_SP_VIBeffect$tDCS)
 BL_SP_VIBeffect$ptp<- factor(BL_SP_VIBeffect$ptp)
-BL_SP_VIBeffect$VIBeffectCond<- factor(BL_SP_VIBeffect$VIBeffectCond)
+BL_SP_VIBeffect$vibCond<- factor(BL_SP_VIBeffect$vibCond)
 BL_SP_VIBeffect$timept<- factor(BL_SP_VIBeffect$timept)
 
 means_BL_SP_VIBeffect<- summarySEwithin(BL_SP_VIBeffect, measurevar="DATA", 
@@ -213,6 +220,25 @@ print("Does tDCS influence the vib effect once we baseline?")
 print(summary(modelAOV_BL_VIBeffect_SP))
 
 
+#Analysis of baselined SP vibEffect data, split by vibCondition
+
+
+BL_SP_VIBeffect_vibADM<- subset(BL_SP_VIBeffect, vibCond=='vibADM')
+BL_SP_VIBeffect_vibFDI<- subset(BL_SP_VIBeffect, vibCond=='vibFDI')
+
+means_BL_SP_VIBeffect_vibADM<- summarySEwithin(BL_SP_VIBeffect_vibADM, measurevar="DATA", 
+                                        withinvars=c( "tDCS", "timept", "muscle"), idvar="ptp")
+means_BL_SP_VIBeffect_vibFDI<- summarySEwithin(BL_SP_VIBeffect_vibFDI, measurevar="DATA", 
+                                               withinvars=c( "tDCS", "timept", "muscle"), idvar="ptp")
+
+
+modelAOV_BL_VIBeffect_vibADM<-aov(DATA~timept*tDCS*muscle+Error(ptp), data=BL_SP_VIBeffect_vibADM)
+print("Does tDCS influence the vib effect of ADM vib?")
+print(summary(modelAOV_BL_VIBeffect_vibADM))
+
+modelAOV_BL_VIBeffect_vibFDI<-aov(DATA~timept*tDCS*muscle+Error(ptp), data=BL_SP_VIBeffect_vibFDI)
+print("Does tDCS influence the vib effect of FDI vib?")
+print(summary(modelAOV_BL_VIBeffect_vibFDI))
 
 
 
