@@ -8,3 +8,5 @@ Pipeline
 
 N.B. to create bar/line graphs using ggplot2 you require the summarySE_within.R script.   
   You must run this to load in the functions which create the means, SD and SE for each measure type
+
+Ignore SignalScripts folder
