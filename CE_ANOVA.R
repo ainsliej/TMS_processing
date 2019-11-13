@@ -8,13 +8,13 @@ library(ggplot2)
 
 #Load ALL data
 ALL_CE <- read.delim('ALL_tableCE.txt', header=TRUE, sep=',' )
-ALL_CE$muscle<-factor(ALL_CE$muscle)
-ALL_CE$tDCS<- factor(ALL_CE$tDCS)
-ALL_CE$ptp<- factor(ALL_CE$ptp)
-ALL_CE$timept<- factor(ALL_CE$timept)
+ALL_CE$muscle <- factor(ALL_CE$muscle)
+ALL_CE$tDCS <- factor(ALL_CE$tDCS)
+ALL_CE$ptp <- factor(ALL_CE$ptp)
+ALL_CE$timept <- factor(ALL_CE$timept)
 
-ALL_CE_FDI<-subset(ALL_CE,muscle=="FDI")
-T1_CE<-subset(ALL_CE,timept=="T1")
+ALL_CE_FDI <- subset(ALL_CE,muscle=="FDI")
+T1_CE <- subset(ALL_CE,timept=="T1")
 
 ggplot(T1_CE, aes(x=muscle, y=DATA, group=interaction(tDCS,muscle)))+
   geom_violin(position="dodge",aes(fill=factor(tDCS))) +theme_minimal()+
@@ -22,7 +22,7 @@ ggplot(T1_CE, aes(x=muscle, y=DATA, group=interaction(tDCS,muscle)))+
   labs(title='Baseline CE, split by muscle',
        x='time point', y='MEP size in mV')
  
-modelAOV_T1CE<-aov(DATA~muscle*tDCS+Error(ptp), data=T1_CE)
+modelAOV_T1CE <- aov(DATA~muscle*tDCS+Error(ptp), data=T1_CE)
 print("Check whether there is any CE differences at T1")
 print(summary(modelAOV_T1CE))
 
