@@ -30,6 +30,8 @@ LSTR = 7;
 READ = 0;
 INT4 = 4;  % **
 DSVAR = 1; % **
+nchan=1;
+
 
 % choose files to convert
 
@@ -68,7 +70,7 @@ for fCount = 1:length(fName)
 
                 % loop over all channels
 
-                for chCount = 1:3
+                for chCount = 1:nchan
 %             chCount
                     % read trace parameters
                     [D.param.tOffset(chCount),points, ...
